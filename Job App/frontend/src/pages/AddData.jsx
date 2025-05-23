@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const AddData = () => {
   const [title, setTitle] = useState("");
@@ -13,10 +16,11 @@ const AddData = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, description }),
     });
-    
+
 
     if (response.ok) {
-      navigate("/");
+      toast.success("Data Add successfully!");
+      setTimeout(() => navigate("/"), 1500);
     }
   };
 
@@ -34,7 +38,10 @@ const AddData = () => {
         </div>
         <button type="submit" className="btn btn-primary">Submit</button>
       </form>
+      <ToastContainer position="top-center" autoClose={2000} />
+
     </div>
+
   );
 };
 

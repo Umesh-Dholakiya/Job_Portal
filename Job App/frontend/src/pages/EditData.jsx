@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const EditData = () => {
   const { id } = useParams();
@@ -9,24 +12,48 @@ const EditData = () => {
 
   useEffect(() => {
     const fetchItem = async () => {
-      const res = await fetch(`http://localhost:9000/data/${id}`);
-      const result = await res.json();
+      try {
+        const res = await fetch(`http://localhost:9000/data?id=${id}`);
+        const result = await res.json();
 
-      setTitle(result.title);
-      setDescription(result.description);
+        const item = result[0];
+        if (item) {
+          setTitle(item.title);
+          setDescription(item.description);
+        } else {
+          toast.error("Item not found");
+        }
+      } catch (err) {
+        toast.error("Fetch error:", err);
+      }
     };
     fetchItem();
   }, [id]);
 
   const handleForm = async (e) => {
     e.preventDefault();
-    await fetch(`http://localhost:9000/data/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description })
-    });
-    navigate("/");
+    try {
+      const res = await fetch(`http://localhost:9000/data/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, description })
+      });
+
+      if (!res.ok) {
+        throw new Error("Update failed");
+      }
+
+      toast.success("Data updated successfully!");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+
+    } catch (error) {
+      toast.error("Failed to update data!");
+    }
   };
+
 
   return (
     <div className="container mt-5">
@@ -42,6 +69,8 @@ const EditData = () => {
         </div>
         <button type="submit" className="btn btn-primary">Update</button>
       </form>
+      <ToastContainer position="top-center" autoClose={2000} />
+
     </div>
   );
 };
